@@ -1,0 +1,600 @@
+\documentclass{beamer}
+
+\usepackage[slovene]{babel}
+\usepackage{amsfonts,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{gensymb}
+\usepackage{multirow}
+
+\usetheme{AnnArbor}
+\usecolortheme{orchid}
+%\usecolortheme{seagull}
+
+\def\N{\mathbb{N}} % mnozica naravnih stevil
+\def\Z{\mathbb{Z}} % mnozica celih stevil
+\def\Q{\mathbb{Q}} % mnozica racionalnih stevil
+\def\R{\mathbb{R}} % mnozica realnih stevil
+\def\C{\mathbb{C}} % mnozica kompleksnih stevil
+\def\T{\mathbb{T}} % polkolobar tropskih števil
+
+\def\P{\mathbb{P}} % projektivna ravnina
+\def\F{\mathbb{F}} % komutativen obseg
+\def\A{\mathbb{A}} % afina ravninva
+
+\def\qed{$\hfill\Box$}   % konec dokaza
+\newtheorem{izrek}{Izrek}
+\newtheorem{trditev}{Trditev}
+\newtheorem{posledica}{Posledica}
+\newtheorem{lema}{Lema}
+\newtheorem{definicija}{Definicija}
+\newtheorem{opomba}{Opomba}
+\newtheorem{primer}{Primer}
+\newtheorem{zgled}{Zgled}
+\newtheorem{zgledi}{Zgledi uporabe}
+\newtheorem{zglediaf}{Zgledi aritmetičnih funkcij}
+\newtheorem{oznaka}{Oznaka}
+\newtheorem{hipoteza}{Hipoteza}
+\newtheorem{algoritem}{Algoritem}
+
+\title{Verjetnostni singularni razcep}
+\author[Tjaša Bajc]{\textbf {Tjaša Bajc}}
+
+\date{15.\ maj 2020}
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\titlepage
+Fakulteta za matematiko in fiziko, \\
+mentor: prof. dr. Bor Plestenjak
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Motivacija}
+Računanje z velikimi matrikami je lahko časovno zelo zahtevno. Izkaže se, da se algoritmi občutno pohitrijo, če si pomagamo z verjetnostjo.
+
+Primeri uporabe:
+\begin{itemize}
+\item aproksimacija velikih matrik nizkega ranga
+\item reševanje problema najmanjših kvadratov (velika matrika koeficientov)
+\end{itemize}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Ideja}
+Namesto celotne (velike) matrike $A$ ranga $k$ bomo naključno izbrali $k$ stolpcev in iskano operacijo namesto na celotni matriki $A$ izvedli le na teh $k$ stolpcih. To bo (z veliko verjetnostjo) dober približek za natančen rezultat.
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}
+\frametitle{Problem}
+
+Naj bo $A$ matrika velikosti $m \times n,$ za katero želimo izvesti  matrični razcep  (npr. QR, SVD). Iščemo matriki $B$ in $C$ velikosti $m \times k$ in $k \times n,$ kjer je $k$ mnogo manjši od $n$ in hkrati velja $A \approx BC.$ Razcep izvedemo v dveh korakih.
+
+\begin{enumerate}
+\item Izračunamo aproksimacijo baze za $\text{im} (A).$ Iščemo matriko $Q$ s $k$ ortonormiranimi stolpci, da bo veljalo $A \approx Q Q^{H} A.$ 
+\item Izračunamo iskani matrični razcep s pomočjo dobljene matrike $Q.$\newline
+\end{enumerate}
+
+
+% 
+
+\pause
+\begin{opomba}
+Nedeterminističen je le prvi korak -- konstrukcija matrike $Q$.
+\end{opomba}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Vsebina predstavitve}
+
+\begin{itemize}
+\item Ponovitev standardnega SVD
+\item Verjetnostni SVD z dano matriko $Q$
+\item Teoretični minimum napake pri aproksimaciji
+\item Konstrukcija $Q$ -- prvi način
+\item Konstrukcija $Q$ -- drugi način
+\item Pričakovana vrednost napake
+\item Meje za napako
+\end{itemize}
+
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Ponovitev: singularni razcep}
+\begin{definicija}
+\emph{Singularne vrednosti} matrike $A$ so $\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_n \geq 0,$ ki so pozitivni kvadratni koreni  lastnih vrednosti matrike $A^HA.$
+\end{definicija}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Ponovitev: singularni razcep}
+
+
+\begin{izrek}
+Za vsako matriko $A \in \mathbb{R}^{m \times n}, m \geq n,$ obstaja singularni razcep $$A = U \Sigma V^T,$$ kjer sta $U \in \mathbb{R}^{m \times m}$ in $V \in \mathbb{R}^{n \times n}$ ortogonalni matriki, $\Sigma \in \mathbb{R}^{m \times n}$ je oblike
+$$\Sigma =
+\begin{bmatrix}
+    \sigma_1 & \\
+     & \ddots \\
+    & & \sigma_n\\
+&&\\
+\end{bmatrix}
+$$
+in 
+ $\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_n \geq 0$ so singularne vrednosti matrike $A.$
+
+Stolpci matrike U so levi singularni vektorji, stolpci matrike V pa desni singularni vektorji.
+\end{izrek}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Verjetnostni singularni razcep}
+
+Iščemo približek singularnega razcepa matrike $A$. Recimo, da poznamo ustrezno matriko $Q.$ Iščemo torej take $U, \Sigma$ in $V$, da bo $A \approx U \Sigma V^H.$ Oglejmo si prilagojeni algoritem.
+
+\begin{algoritem}
+\begin{enumerate}
+\item Izračunamo $B = Q^H A$, kar nam da približek $A \approx QB.$
+\item Izračunamo singularni razcep (manjše) matrike $B,$ torej $B = \tilde{U} \Sigma V^H.$
+\item Izračunamo $U = Q \tilde{U}.$
+\end{enumerate}
+\end{algoritem}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Teoretični minimum}
+
+Za dano matriko $A$ in toleranco $\epsilon$ iščemo matriko $Q$ s $k = k(\epsilon)$ ortonormiranimi stolpci, da bo veljalo $$||A - QQ^HA|| \leq \epsilon,$$ pri čemer $|| \cdot ||$ označuje $2$-normo.Označimo s $\sigma_i$ tisto singularno vrednost $A$, ki je $i$-ta po velikosti. Potem za $i \geq 0$ velja $$\min_{rang(X) \leq i} ||A - X || = \sigma_{i+1}.$$
+
+Minimum je dosežen recimo pri $X = \tilde{Q}\tilde{Q}^HA,$ kjer so stolpci $\tilde{Q}$ sestavljeni iz $k$ dominantnih levih singularnih vektorjev $A$. Sledi, da je najmanjši rang, s katerim lahko napako zmanjšamo pod $\epsilon,$ enak številu singularnih vrednosti $A,$ ki so po velikosti večje od tolerance $\epsilon.$
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Konstrukcija matrike $Q$}
+
+Pri dani matriki $A$ dimenzij $m \times n$ iščemo ortogonalno matriko $Q$ s čim manjšim številom stolpcev, za katero bo veljalo, da je $$||A - QQ^HA|| < \epsilon,$$ kjer je $\epsilon$ izbrana toleranca. Prvi način za konstrukcijo matrike $Q$ je, da naključno izberemo $\ell$ normalno porazdeljenih slučajnih vektorjev dolžine $n$ in jih zložimo v matriko $\Omega.$ Neformalno, s temi vektorji bomo izbrali naključni vzorec vektorjev iz slike $A$, ki jih nato ortogonaliziramo. %Formalno idejo povzema spodnji algoritem.
+
+\begin{algoritem}[Osnovni algoritem]
+\begin{enumerate}
+\item Naključno izberemo matriko $\Omega$ velikosti $n \times \ell,$ katere stolpci so normalno porazdeljeni slučajni vektorji.
+\item Izračunamo matriko $Y = A \Omega,$ ki je velikosti $m \times \ell.$ 
+\item Iskana matrika $Q$ je dana s QR-razcepom matrike $Y,$ torej $Y = QR.$
+\end{enumerate}
+\end{algoritem}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Vprašanje: Kolikšen naj bo $\ell$?}
+
+Če vemo, da je matrika $A$ ranga $k,$ lahko vzamemo kar $\ell = k.$ Izkaže se, da če $\ell$ le malo povečamo (torej $\ell = k + p,$ kje je $p$ parameter prekomernega vzorčenja), dobimo natančnost blizu teoretičnega minimuma. 
+
+Ker v praksi ranga matrike pogosto ne poznamo, lahko prejšnji algoritem prilagodimo tako, da matriko $Q$ gradimo postopoma (iterativno).
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Iterativna konstrukcija $Q$}
+
+\begin{lema}
+Naj bo $B\in \mathbb{R}^{m \times n},$ naj bo $r$ fiksno naravno število in naj bo $\alpha > 1$ realno število. Izberemo $r$ neodvisnih standardno normalnih vektorjev $\omega_i, i = 1, 2, \cdots, r.$ Potem velja $$||B|| \leq \alpha \sqrt{\frac{2}{\pi}} \max_{i = 1, 2, \cdots, r} ||B\omega_i||$$ z verjetnostjo $1- \alpha^{-r}.$
+\end{lema}
+
+Izberimo $\alpha = 10$ in $B = A - QQ^HA$ ter prepišimo rezultat.
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Iterativna konstrukcija $Q$}
+
+\begin{posledica}
+Velja $$||A - QQ^HA|| \leq 10 \sqrt{\frac{2}{\pi}} \max_{i = 1, 2, \cdots, r} ||(A - QQ^HA)\omega_i||$$ z verjetnostjo $1-10^{-r}.$
+\end{posledica}
+
+Od tod dobimo idejo za iterativno konstrukcijo matrike $Q.$ Za dano toleranco $\epsilon$ bi radi izbrali najmanjše možno število slučajnih vektorjev, s pomočjo katerih bomo zgadili $Q,$ da bo veljalo $||A - QQ^HA|| \leq \epsilon.$ Ko zaporedoma izberemo $r$ slučajnih vektorjev $\omega_i,$ za katere je $ ||(A - QQ^HA)\omega_i|| < \epsilon / 10\sqrt{2/\pi},$ bo tudi maksimum teh $r$ vektorjev  z verjetnostjo $1-10^{-r}$ manjši od $\epsilon,$ kar pomeni, da lahko z izbiranjem vektorjev končamo.
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Iterativna konstrukcija $Q$}
+
+\begin{algoritem}[Bistveni del algoritma]
+Začnemo s prazno matriko $Q_0.$
+
+Za $i = 1, 2, 3, \ldots$
+\begin{itemize}
+\item Izberemo $n \times 1$ normalni slučajni vektor $\omega_i$ in izračunamo $y_i = A \omega_i.$
+\item Izračunamo $\tilde{q_i} = (I - Q_{i-1}Q_{i-1}^H)y_i$
+\item Normaliziramo $q_i =\tilde{q_i}/||\tilde{q_i}||$ in popravimo $Q_i = [Q_{i-1} \ q_i].$
+\end{itemize}
+\end{algoritem}
+
+Zaradi preglednosti je izpuščeno preverjanje, ali $r$ zaporednih vektorjev dosega ustrezne norme, in ortogonalizacija vektorjev.
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Ocena s pričakovano vrednostjo -- splošna}
+
+\begin{izrek}
+Naj bo $A \in \mathbb{R}^{m \times n}.$ Izberimo želeni rang $k \geq 2$ in parameter $p \geq 2,$ da bo $k+p \leq \min\{m,n\}.$ Matriko $Q  \in \mathbb{R}^{m \times (k+p)}$ dobimo s pomočjo osnovnega algoritma. Potem velja 
+$$\textbf{E}||A - QQ^HA|| \leq \Biggl (1 + \sqrt{\frac{k}{p-1}} \Biggr ) \sigma_{k+1} + \frac{e\sqrt{k+p}}{p} \Bigl ( \sum_{j>k} \sigma_j^2 \Bigr)^{\frac{1}{2}},$$
+kjer je \textbf{E} pričakovana vrednost glede na slučajno matriko iz osnovnega algoritma.
+\end{izrek}
+
+Ker lahko vse kasnejše singularne vrednosti ocenimo s $\sigma_{k+1},$ lahko izrek prepišemo v bolj kompaktni obliki.
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Ocena s pričakovano vrednostjo -- poenostavljena}
+
+\begin{posledica}
+Naj bo $A \in \mathbb{R}^{m \times n}.$ Izberimo želeni rang $k \geq 2$ in parameter $p \geq 2,$ da bo $k+p \leq \min\{m,n\}.$ Matriko $Q  \in \mathbb{R}^{m \times (k+p)}$ dobimo s pomočjo osnovnega algoritma. Potem velja 
+$$\textbf{E}||A - QQ^HA|| \leq \Biggl [1 + \sqrt{\frac{k}{p-1}} + \frac{e\sqrt{k+p}}{p} \cdot \sqrt{\min \{m,n\} - k} \Biggr ] \sigma_{k+1},$$ 
+kjer je \textbf{E} pričakovana vrednost glede na slučajno matriko iz osnovnega algoritma.
+\end{posledica}
+
+Ali je pričakovana vrednost dobra ocena? 
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Meja za napako}
+
+Iz izreka, ki ga na tem mestu ne bomo navajali, sledi naslednja posledica.
+
+\begin{posledica}
+Naj bo $A \in \mathbb{R}^{m \times n}.$ Izberimo želeni rang $k \geq 2$ in parameter $p \geq 4,$ da bo $k+p \leq \min\{m,n\}.$ Matriko $Q  \in \mathbb{R}^{m \times (k+p)}$ dobimo s pomočjo osnovnega algoritma. Potem ocena
+ $$||A - QQ^HA|| \leq \Big ( 1 +8\sqrt{(k+p)\cdot p \log p} \Bigr ) \sigma_{k+1} + 3 \sqrt{k+p} (\sum_{j>k} \sigma_j^2)^{\frac{1}{2}},$$ 
+ne velja z verjetnostjo največ $6p^{-p}$ oziroma velja z verjetnostjo $1 - 6p^{-p}.$
+\end{posledica}
+
+Vidimo, da je napaka primerno majhna z veliko verjetnostjo. 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Priprava na dokaz izreka -- vpeljava oznak}
+Naj bo $A$ dana matrika in $A = U \Sigma V^H$ njen singularni razcep. Ker osnovni algoritem deluje kot aproksimacija prvih $k$ stolpcev matrike $U$, uvedemo naslednje oznake:
+$$ \Sigma = 
+\begin{bmatrix}
+\Sigma_1 & \\
+& \Sigma_2 \\
+\end{bmatrix}, \qquad
+V = 
+\begin{bmatrix}
+V_1, V_2 \\
+\end{bmatrix}.
+$$ 
+Naj bo $\Omega$ kot v osnovnem algoritmu in naj ima $\ell$ stolpcev, $\ell \geq k.$ V skladu z razdelitvijo matrike $V$ označimo $\Omega_1 = V_1^H\Omega, \Omega_2 = V_2^H\Omega.$
+\pause
+\begin{definicija}[Moore-Penrosov psevdoinverz]
+Matrika $A^+ \in \mathbb{R}^{n\times m}$ je psevdoinverz matrike $A  \in \mathbb{R}^{m\times n},$ če velja
+\begin{itemize}
+\item $AA^+A = A$
+\item $A^+AA^+ = A^+$
+\item $(AA^+)^T = AA^+$
+\item $(A^+A)^T = A^+A$
+\end{itemize}
+\end{definicija}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Priprava na dokaz izreka -- ocena za napako v novih oznakah}
+\begin{izrek}[Izrek A]
+Naj bo $A$ dana matrika in $A = U \Sigma V^H$ njen singularni razcep, naj bo $k \geq 0.$ Izberimo slučajno matriko $\Omega$. Naj bodo $\Sigma_2, \Omega_1$ in $\Omega_2$ kot prej. Če ima $\Omega_1$ poln rang, velja $$|||A - QQ^HA|||^2 \leq |||\Sigma_2|||^2 + |||\Sigma_2 \Omega_2 \Omega_1^+|||^2,$$ kjer je $||| \cdot|||$ bodisi $2$-norma bodisi Frobeniusova norma.
+\end{izrek}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Priprava na dokaz izreka -- norme slučajnih matrik}
+
+\begin{lema}[Lema B]
+Naj bosta $S$ in $T$ dani matriki in $\Omega$ standardna normalna matrika. Potem velja %$$(\textbf{E} ||S \Omega T ||_F^2)^{\frac{1}{2}} = ||S||_F ||T||_F,$$
+$$\textbf{E} ||S \Omega T || \leq ||S||\ ||T||_F + ||S||_F  \ ||T||.$$
+\end{lema}
+\pause
+\begin{lema}[Lema C]
+Naj bo $\Omega$ standardna normalna matrika velikosti $k \times (k+p),$ kjer je $k \geq 2, p \geq 2.$ Potem velja $$(\textbf{E} ||\Omega^+ ||_F^2)^{\frac{1}{2}} = \sqrt{\frac{k}{p-1}}, \qquad\textbf{E} || \Omega^+ || \leq \frac{e\sqrt{k + p}}{p}.$$
+\end{lema}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Ocena s pričakovano vrednostjo še enkrat}
+
+\begin{izrek}
+Naj bo $A \in \mathbb{R}^{m \times n}.$ Izberimo želeni rang $k \geq 2$ in parameter $p \geq 2,$ da bo $k+p \leq \min\{m,n\}.$ Matriko $Q  \in \mathbb{R}^{m \times (k+p)}$ dobimo s pomočjo osnovnega algoritma. Potem velja 
+$$\textbf{E}||A - QQ^HA|| \leq \Biggl (1 + \sqrt{\frac{k}{p-1}} \Biggr ) \sigma_{k+1} + \frac{e\sqrt{k+p}}{p} \Bigl ( \sum_{j>k} \sigma_j^2 \Bigr)^{\frac{1}{2}},$$
+kjer je \textbf{E} pričakovana vrednost glede na slučajno matriko iz osnovnega algoritma.
+\end{izrek}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Dokaz izreka}
+A:$||A - QQ^HA||^2 \leq ||\Sigma_2||^2 + ||\Sigma_2 \Omega_2 \Omega_1^+||^2,$
+ 
+B:$\textbf{E} ||S \Omega T || \leq ||S||\ ||T||_F + ||S||_F  \ ||T||.$
+
+C:$(\textbf{E} ||\Omega^+ ||_F^2)^{\frac{1}{2}} = \sqrt{\frac{k}{p-1}}, \qquad\textbf{E} || \Omega^+ || \leq \frac{e\sqrt{k + p}}{p}.$
+
+H\"olderjeva neenakost:  $\textbf{E}(||X||^p) \leq \bigl ( \textbf{E}(||X||^s) \bigr ) ^{\frac{p}{s}}.$
+\newline \newline \newline \newline \newline \newline \newline \newline \newline \newline \newline \newline\newline \newline \newline \newline
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Dokaz izreka}
+
+Najprej povejmo, da je $V^H \Omega$ standardna normalna slučajna matrika (množenje z $V$ na to ne vpliva). Potem sta $\Omega_1, \Omega_2$ podmatriki $V^H\Omega,$ ki nimata skupnih elementov in sta zato obe standardni normalni in še neodvisni. Zaradi normalnosti so vrstice $k \times (k+p)$ matrike $\Omega_1$ skoraj gotovo neodvisne in zato lahko privzamemo, da je $\Omega_1$ polnega ranga.
+
+Iz izreka A sledi $$\textbf{E}|| A - QQ^HA|| \leq \textbf{E}(|| \Sigma_2||^2 + ||\Sigma_2 \Omega_2 \Omega_1^+||^2)^{\frac{1}{2}} \leq ||\Sigma_2|| +  \textbf{E}|| \Sigma_2 \Omega_2 \Omega_1^+||.$$
+
+Sedaj pogojujemo na $\Omega_1$ in uporabimo lemo B na $\Omega_2,$ kar nam da mejo za oceno zadnje pričakovane vrednosti.
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Dokaz izreka}
+
+Torej je 
+\begin{align*}
+\textbf{E}|| \Sigma_2 \Omega_2 \Omega_1^+|| &\leq \textbf{E}(|| \Sigma_2 || \cdot|| \Omega_1^+||_F + || \Sigma_2 ||_F \cdot || \Omega_1^+||) \\
+ &\leq ||\Sigma_2|| \cdot (\textbf{E}|| \Omega_1^+||_F^2)^{\frac{1}{2}} + ||\Sigma_2||_F \cdot \textbf{E}|| \Omega_1^+||,
+\end{align*}
+pri čemer smo v drugi vrstici uporabili H\"olderjevo neenakost.
+
+Sedaj opazimo, da nas od zaključka loči le še uporaba leme C na obeh zgornjih pričakovanih vrednostih psevdoinverzov matrike $\Omega_1.$
+
+\begin{opomba}
+H\"olderjeva neenakost v tem primeru pove, da je $\textbf{E}(||X||^p) \leq \bigl ( \textbf{E}(||X||^s) \bigr ) ^{\frac{p}{s}}.$
+\end{opomba}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Dokaz izreka}
+
+Uporabimo torej lemo C in dobimo
+$$\textbf{E}|| \Sigma_2 \Omega_2 \Omega_1^+|| \leq \sqrt{\frac{k}{p-1}} || \Sigma_2|| + \frac{e\sqrt{k + p}}{p} || \Sigma_2|| _F.$$
+
+Za konec se spomnimo še, da je $||\Sigma_2|| = \sigma_{k+1}$ in $||\Sigma_2||_F = (\sum_{j>k} \sigma_j^2)^{\frac{1}{2}}.$
+Sledi
+\begin{align*}
+\textbf{E}|| A - QQ^HA|| &\leq ||\Sigma_2|| +  ||\Sigma_2|| \cdot \textbf{E}(|| \Omega_1^+||_F^2)^{\frac{1}{2}} + ||\Sigma_2||_F \cdot \textbf{E}|| \Omega_1^+|| \\
+& \leq  \Biggl (1 + \sqrt{\frac{k}{p-1}} \Biggr ) \sigma_{k+1} + \frac{e\sqrt{k+p}}{p} \Bigl ( \sum_{j>k} \sigma_j^2 \Bigr)^{\frac{1}{2}},
+\end{align*}
+kar smo dokazovali.
+\end{frame}
+
+
+%\begin{frame}
+%\frametitle{Dokaz?}
+%
+%Spomnimo se, da za dano matriko $M$ označimo s $P_M$ tisti ortogonalni projektor, za karerega je $\text{im} (M) = \text{im} (P_M).$ Tak projektor je enolično določen. Matrika $Q$ je baza za $Y = A\Omega,$ zato je $\text{im} (Q) = \text{im} (Y) = \text{im} (A\Omega),$ s čimer aproksimiramo $\text{im} (A).$
+%Velja $QQ^H = P_Y$
+%
+%
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}
+%\frametitle{Dokaz?}
+%
+%\begin{trditev}
+%Naj velja $\text{im} (N) \subset \text{im} (M).$ Potem za vsako matriko $A$ velja $||P_N A || \leq ||P_MA||.$
+%\end{trditev}
+%
+%Sledi, da bo pri višjem ran
+%
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%
+%\begin{frame}
+%\frametitle{Problem}
+%
+%\begin{definicija}
+%Funkcija $\Phi : \R^n \to \R$ je \emph{radialna}, če obstaja funkcija $\psi : \R_{\geq 0} \to \R$, da je $\Phi(\boldsymbol{x}) = \psi(||\boldsymbol{x}||)$ za vse $\boldsymbol{x} \in \R^n$ za neko normo $||\cdot|| : \R^n \to \R_{\geq 0}$ (ponavadi evklidsko).
+%\end{definicija}
+%\begin{opomba}
+%Funkcija $\Phi$ je odvisna od oddaljenosti točke $\boldsymbol{x}$ od izhodišča. Funkcijo lahko hitro priredimo za različne dimenzije.
+%\end{opomba}
+%\pause
+%Podatki:
+%\begin{itemize}
+%\item  točke $\boldsymbol{x_i} \in \R^n$, $ i = 1,\ldots,N$
+%\item vrednosti $y_i \in \R$, $ i = 1,\ldots,N$
+%\end{itemize}
+%\pause
+%\vspace{5mm}
+%Iščemo interpolacijsko funkcijo oblike
+% $$s(\boldsymbol{x}) = \sum_{i = 1}^{N}\lambda_i \Phi_i(\boldsymbol{x}), \quad x \in \R^n .$$
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}
+%\frametitle{Sistem}
+%
+%Pogoji, ki jih želimo izpolniti, so $s(\boldsymbol{x_i}) = y_i$ za vse $i$. Pogoje združimo v sistem
+%\[
+%\begin{bmatrix}
+%    \Phi_1(\boldsymbol{x_1}) & \Phi_2(\boldsymbol{x_1}) & \Phi_3(\boldsymbol{x_1}) & \dots    & \Phi_N(\boldsymbol{x_1}) \\
+%    \Phi_1(\boldsymbol{x_2}) & \Phi_2(\boldsymbol{x_2}) & \Phi_3(\boldsymbol{x_2}) & \dots    & \Phi_N(\boldsymbol{x_2}) \\
+%    \vdots 	  & \vdots 	    & \vdots 	      &   & \vdots \\
+%    \Phi_1(\boldsymbol{x_N}) & \Phi_2(\boldsymbol{x_N}) & \Phi_3(\boldsymbol{x_N}) & \dots   & \Phi_N(\boldsymbol{x_N}) \\
+%\end{bmatrix}
+%\begin{bmatrix}
+%    \lambda_1 \\
+%    \lambda_2 \\
+%    \vdots \\
+%    \lambda_N
+%\end{bmatrix}
+%=
+%\begin{bmatrix}
+%    y_1 \\
+%    y_2 \\
+%    \vdots \\
+%    y_N
+%\end{bmatrix}
+%\]
+%ali poenostavljeno $A\boldsymbol{\lambda} = \boldsymbol{y}$. Sistem ima enolično rešitev, če $A$ ni singularna.
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}
+%
+%Za višje dimenzije se da pokazati, da lahko za katerekoli bazne funkcije, ki so neodvisne od podatov, poiščemo podatke, da postane sistem singularen (Haarov izrek). Enostaven primer baznih funkcij, ki so odvisne od podatkov, so take, ki so odvisne od oddaljenosti od podanih točk - radialne funkcije.
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}
+%\frametitle{RBF sistem}
+%
+%Interpolacijska funkcija $s$ bo linearna kombinacija translacij $\Phi_i$ iste radialne funkcije $\Phi$,
+%$$\Phi_i(\boldsymbol{x}) = \Phi(\boldsymbol{x}-\boldsymbol{x_i}) = \psi(||\boldsymbol{x} - \boldsymbol{x_i}||).$$
+%Točki $\boldsymbol{x_i}$ pravimo center funkcije $\Phi_i$. Če za centre $\boldsymbol{x_i}$ vzamemo kar podane točke, dobimo
+%\[
+%A =
+%\begin{bmatrix}
+%    \psi(||\boldsymbol{x_1} - \boldsymbol{x_1}||) & \psi(||\boldsymbol{x_1} - \boldsymbol{x_2}||) & \dots    & \psi(||\boldsymbol{x_1} - \boldsymbol{x_N}||) \\
+%    \psi(||\boldsymbol{x_2} - \boldsymbol{x_1}||) & \psi(||\boldsymbol{x_2} - \boldsymbol{x_2}||) & \dots    & \psi(||\boldsymbol{x_2} - \boldsymbol{x_N}||) \\
+%    \vdots 	  & \vdots 	    &  	      & \vdots \\
+%    \psi(||\boldsymbol{x_N} - \boldsymbol{x_1}||) & \psi(||\boldsymbol{x_N} - \boldsymbol{x_2}||) & \dots    & \psi(||\boldsymbol{x_N} - \boldsymbol{x_N}||) \\
+%\end{bmatrix}.
+%\]
+%$A$ je simetrična, ker je $||\boldsymbol{x_i} - \boldsymbol{x_j}|| = ||\boldsymbol{x_j} - \boldsymbol{x_i}||$.
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}
+%\frametitle{RBF}
+%
+%\begin{table}[h]
+%\begin{tabular}{|l|l|l|}
+%\hline
+%\multicolumn{1}{|c|}{\textbf{ime}} & \textbf{definicija} & \textbf{parameter} \\[3pt] \hline \hline  & & \\[-3mm]
+%Gaussova funkcija                   &  $\psi(r) = e^{-(\epsilon r)^2}$                		 &     $\epsilon > 0$               \\[3pt] \hline & & \\[-3mm]
+%multikvadrika                           &       $\psi(r) = \sqrt{1 + (\epsilon r)^2}$              	 &      $\epsilon > 0$              \\[3pt] \hline & & \\[-3mm]
+%inverzna kvadrika                    &     $\psi(r) = \frac{1}{1 + (\epsilon r)^2}$                 	&      $\epsilon > 0$              \\[3pt] \hline & & \\[-3mm]
+%inverzna multikvadrika             &   $\psi(r) = \frac{1}{\sqrt{1 + (\epsilon r)^2}}$           &      $\epsilon > 0$              \\[3pt]  \hline & \multicolumn{2}{l|}{} \\[-3mm]
+%poliharmonične funkcije            &   \multicolumn{2}{l|}{$\psi(r) = r^k$,  $k = 1, 3, 5, \ldots$}           \\[1pt] & \multicolumn{2}{l|}{} \\[-4mm]
+%			                &    \multicolumn{2}{l|}{$\psi(r) = r^k \ln(r)$,  $k = 2, 4, 6, \ldots$}          \\[1pt] \hline
+%\end{tabular}
+%\end{table}
+%Gaussova funkcija, multikvadrika, inverzna multikvadrika in inverzna kvadrika so vse gladke funkcije, poliharmonične funkcije pa so le odsekoma gladke. Poseben primer poliharmoničnih funkcij je pri $k = 2$, ko dobimo funkcijo gladke plošče $\psi(r) = r^2\ln(r)$.
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%\begin{frame}
+%%
+%%Na voljo imamo torej izbiro radialne funkcije in parametra $\epsilon$. Odvisnost $\epsilon$ - občutljivost matrike A - število točk. Če rešitev obstaja in je enolična še ne pomeni, da jo lahko enostavno numerično pridobimo.
+%%
+%%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}
+%\frametitle{Razširjene RBF}
+%Včasih linearni kombinaciji radialnih baznih funkcij v $s(\boldsymbol{x})$ dodamo še linearno kombinacijo baznih polinomov prostora $\R^n$ stopenje največ $m$. V tem primeru je naša interpolacijska funkcija oblike
+%\[ s(\boldsymbol{x}) = \sum_{i = 1}^{N}\lambda_i \Phi_i(\boldsymbol{x}) + \sum_{j = 1}^{\tilde{m}}\gamma_j p_j(\boldsymbol{x}), \quad x \in \R^n \]
+%kjer so $p_j$, $j = 1,\ldots,\tilde{m}$ baza prostora $\Pi_{m}(\R^n)$ polinomov iz $\R^n$ v $\R$ stopnje največ $m$. Dimenzija tega prostora je $\tilde{m} = {m+n\choose n}$. S tem dobimo dodatne parametre, ki jim dodamo pogoj
+%\[ \sum_{i = 1}^{N} \lambda_i p_j(\boldsymbol{x_i}) = 1, \quad j = 1,\ldots,\tilde{m}\]
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%\begin{frame}
+%%\frametitle{Razširjene RBF}
+%%
+%%Enostavneje lahko novi sistem zapišemo v matrični obliki kot
+%%\[ 
+%%\begin{bmatrix}
+%%    A & P \\
+%%    P^T & 0 \\
+%%\end{bmatrix}
+%%\begin{bmatrix}
+%%    \boldsymbol{\lambda} \\
+%%    \boldsymbol{\gamma} \\
+%%\end{bmatrix}
+%%=
+%%\begin{bmatrix}
+%%    \boldsymbol{y} \\
+%%    0 \\
+%%\end{bmatrix}
+%%\]
+%%kjer je $P$ matrika vrednosti baznik polinomov $p_j$ v podanih točkah in $\boldsymbol{\gamma}$ vektor koeficientov $\gamma_j$.
+%%\[ 
+%%P =
+%%\begin{bmatrix}
+%%    p_1(\boldsymbol{x_1}) & p_2(\boldsymbol{x_1}) & p_3(\boldsymbol{x_1}) & \dots    & p_{\tilde{m}}(\boldsymbol{x_1}) \\
+%%    p_1(\boldsymbol{x_2}) & p_2(\boldsymbol{x_2}) & p_3(\boldsymbol{x_2}) & \dots    & p_{\tilde{m}}(\boldsymbol{x_2}) \\
+%%    \vdots 	  & \vdots 	    & \vdots 	      & \vdots  & \vdots \\
+%%    p_1(\boldsymbol{x_N}) & p_2(\boldsymbol{x_N}) & p_3(\boldsymbol{x_N}) & \dots   & p_{\tilde{m}}(\boldsymbol{x_N}) \\
+%%\end{bmatrix},
+%%\quad
+%%\boldsymbol{\gamma}  =
+%%\begin{bmatrix}
+%%    \gamma_1 \\
+%%    \gamma_2 \\
+%%    \vdots \\
+%%    \gamma_{\tilde{m}} \\
+%%\end{bmatrix}
+%%\]
+%%
+%%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%\begin{frame}
+%%\frametitle{Velike količine podatkov}
+%%
+%%Ne moremo vseh interpolirat, ker reševanje sistema vzame preveč časa/prostora. Ponavadi podatke razdelimo in izberemo za začetek manj podatkov, nato pa z interacijo izboljšujemo. Shrani slike za primere!
+%%
+%%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
